@@ -51,6 +51,11 @@ const getAdminNavItems = (): NavItem[] => [
         icon: FolderOpen,
     },
     {
+        title: 'Auth Settings',
+        href: '/admin/auth-settings' as any,
+        icon: Shield,
+    },
+    {
         title: 'Users',
         href: '/admin/users' as any,
         icon: Users,

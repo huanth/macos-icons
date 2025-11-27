@@ -1,9 +1,12 @@
 <?php
 
 use App\Models\Icon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use Laravel\Socialite\Facades\Socialite;
 
 Route::get('/', function () {
     $icons = Icon::with('user')
@@ -155,6 +158,70 @@ Route::get('/icons/{icon:slug}', function (Icon $icon) {
     ]);
 })->name('icons.show');
 
+// Google OAuth login
+Route::get('/auth/google/redirect', function () {
+    if (!\App\Models\Setting::getBoolean('auth_google_enabled', false)) {
+        abort(404);
+    }
+
+    // Apply dynamic config from settings if available
+    $clientId = \App\Models\Setting::get('auth_google_client_id', config('services.google.google_client_id'));
+    $clientSecret = \App\Models\Setting::get('auth_google_client_secret', config('services.google.google_client_secret'));
+    $redirect = \App\Models\Setting::get('auth_google_redirect', config('services.google.google_redirect'));
+
+    config([
+        'services.google.client_id' => $clientId,
+        'services.google.client_secret' => $clientSecret,
+        'services.google.redirect' => $redirect ?: url('/auth/google/callback'),
+    ]);
+
+    return Socialite::driver('google')
+        ->scopes(['openid', 'profile', 'email'])
+        ->redirect();
+})->name('auth.google.redirect');
+
+Route::get('/auth/google/callback', function () {
+    if (!\App\Models\Setting::getBoolean('auth_google_enabled', false)) {
+        abort(404);
+    }
+
+    $clientId = \App\Models\Setting::get('auth_google_client_id', config('services.google.google_client_id'));
+    $clientSecret = \App\Models\Setting::get('auth_google_client_secret', config('services.google.google_client_secret'));
+    $redirect = \App\Models\Setting::get('auth_google_redirect', config('services.google.google_redirect'));
+
+    config([
+        'services.google.client_id' => $clientId,
+        'services.google.client_secret' => $clientSecret,
+        'services.google.redirect' => $redirect ?: url('/auth/google/callback'),
+    ]);
+
+    $googleUser = Socialite::driver('google')->user();
+
+    $user = \App\Models\User::where('google_id', $googleUser->getId())
+        ->orWhere('email', $googleUser->getEmail())
+        ->first();
+
+    if (!$user) {
+        $user = \App\Models\User::create([
+            'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: $googleUser->getEmail(),
+            'email' => $googleUser->getEmail(),
+            'password' => Str::random(32),
+            'role' => 'user',
+            'google_id' => $googleUser->getId(),
+            'google_avatar' => $googleUser->getAvatar(),
+        ]);
+    } else {
+        $user->update([
+            'google_id' => $googleUser->getId(),
+            'google_avatar' => $googleUser->getAvatar(),
+        ]);
+    }
+
+    Auth::login($user, true);
+
+    return redirect()->intended('/dashboard');
+})->name('auth.google.callback');
+
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
@@ -300,6 +367,39 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         
         return back()->with('success', 'Category deleted successfully!');
     })->name('categories.destroy');
+
+    // Auth settings (Google login toggle & config)
+    Route::get('/auth-settings', function () {
+        $googleEnabled = \App\Models\Setting::getBoolean('auth_google_enabled', false);
+        $googleClientId = \App\Models\Setting::get('auth_google_client_id', '');
+        $googleClientSecret = \App\Models\Setting::get('auth_google_client_secret', '');
+        $googleRedirect = \App\Models\Setting::get('auth_google_redirect', url('/auth/google/callback'));
+
+        return Inertia::render('admin/auth-settings', [
+            'google' => [
+                'enabled' => $googleEnabled,
+                'client_id' => $googleClientId,
+                'client_secret' => $googleClientSecret,
+                'redirect' => $googleRedirect,
+            ],
+        ]);
+    })->name('auth-settings');
+
+    Route::post('/auth-settings', function () {
+        request()->validate([
+            'google_enabled' => 'boolean',
+            'google_client_id' => 'nullable|string|max:255',
+            'google_client_secret' => 'nullable|string|max:255',
+            'google_redirect' => 'nullable|string|max:255',
+        ]);
+
+        \App\Models\Setting::set('auth_google_enabled', request('google_enabled', false));
+        \App\Models\Setting::set('auth_google_client_id', request('google_client_id'));
+        \App\Models\Setting::set('auth_google_client_secret', request('google_client_secret'));
+        \App\Models\Setting::set('auth_google_redirect', request('google_redirect'));
+
+        return back()->with('success', 'Authentication settings updated.');
+    })->name('auth-settings.update');
 });
 
 require __DIR__.'/settings.php';

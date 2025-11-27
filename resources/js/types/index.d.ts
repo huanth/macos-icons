@@ -27,6 +27,9 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    authSettings?: {
+        googleEnabled: boolean;
+    };
     [key: string]: unknown;
 }
 

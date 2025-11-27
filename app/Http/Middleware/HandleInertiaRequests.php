@@ -46,6 +46,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'authSettings' => [
+                'googleEnabled' => \App\Models\Setting::getBoolean('auth_google_enabled', false),
+            ],
         ];
     }
 }

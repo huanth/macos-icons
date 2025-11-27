@@ -1,6 +1,7 @@
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
+import type { SharedData } from '@/types';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -11,6 +12,20 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
+    const { authSettings } = usePage<SharedData>().props;
+    const googleEnabled = authSettings?.googleEnabled;
+
+    const handleGoogleLogin = () => {
+        const features =
+            'width=500,height=650,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes';
+        const popup = window.open('/auth/google/redirect', 'googleLoginPopup', features);
+
+        // Fallback nếu popup bị chặn
+        if (!popup) {
+            window.location.href = '/auth/google/redirect';
+        }
+    };
+
     return (
         <AuthLayout
             title="Create an account"
@@ -99,6 +114,29 @@ export default function Register() {
                                 {processing && <Spinner />}
                                 Create account
                             </Button>
+
+                            {googleEnabled && (
+                                <div className="mt-4">
+                                    <div className="relative my-4">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <span className="w-full border-t border-gray-200" />
+                                        </div>
+                                        <div className="relative flex justify-center text-xs uppercase">
+                                            <span className="bg-white px-2 text-gray-500">
+                                                Or continue with
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGoogleLogin}
+                                        className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        <span className="text-lg">G</span>
+                                        <span>Continue with Google</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
