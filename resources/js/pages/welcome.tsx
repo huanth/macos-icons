@@ -101,27 +101,14 @@ export default function Welcome({ canRegister = true, icons: initialIcons, categ
 
     const handleShare = async (icon: Icon) => {
         const url = `${window.location.origin}#${icon.slug}`;
-        
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: icon.name,
-                    text: `Check out this macOS icon: ${icon.name}`,
-                    url: url,
-                });
-            } catch (err) {
-                // User cancelled or error occurred
-                console.log('Share cancelled');
-            }
-        } else {
-            // Fallback: Copy to clipboard
-            try {
-                await navigator.clipboard.writeText(url);
-                alert('Link copied to clipboard!');
-            } catch (err) {
-                // Fallback: Show URL
-                prompt('Copy this link:', url);
-            }
+
+        // Always copy link to clipboard when clicking Share
+        try {
+            await navigator.clipboard.writeText(url);
+            alert('Link copied to clipboard!');
+        } catch (err) {
+            // Fallback: show URL for manual copy
+            prompt('Copy this link:', url);
         }
     };
 
@@ -358,12 +345,6 @@ export default function Welcome({ canRegister = true, icons: initialIcons, categ
                                         <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
                                             {icon.name}
                                         </h3>
-                                        {/* Category Badge */}
-                                        <div className="mb-2">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-                                                {categories.find(cat => cat.slug === icon.category)?.name || icon.category}
-                                            </span>
-                                        </div>
                                         <div className="flex items-center justify-between text-xs">
                                             <span className="text-gray-500 truncate">{icon.user.name}</span>
                                             <span className="text-gray-400">{new Date(icon.created_at).toLocaleDateString()}</span>
@@ -409,9 +390,6 @@ export default function Welcome({ canRegister = true, icons: initialIcons, categ
                                 {selectedIcon.name}
                             </DialogTitle>
                             <DialogDescription className="flex items-center gap-4 mt-2">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-                                    {categories.find(cat => cat.slug === selectedIcon.category)?.name || selectedIcon.category}
-                                </span>
                                 <span className="text-gray-500 text-sm">
                                     by {selectedIcon.user.name}
                                 </span>

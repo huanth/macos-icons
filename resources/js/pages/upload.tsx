@@ -48,6 +48,7 @@ export default function Upload({ categories }: UploadProps) {
     const [preview, setPreview] = useState<string | null>(null);
     const [previewImagePreview, setPreviewImagePreview] = useState<string | null>(null);
     const [fileType, setFileType] = useState<string>('');
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -107,6 +108,11 @@ export default function Upload({ categories }: UploadProps) {
             return;
         }
         
+        // Ensure category matches first selected category (for backend)
+        if (selectedCategories.length > 0) {
+            setData('category', selectedCategories[0]);
+        }
+
         post(dashboardRoutes.upload().url, {
             onSuccess: () => {
                 toast({
@@ -298,22 +304,38 @@ export default function Upload({ categories }: UploadProps) {
                                 <InputError message={errors.description} />
                             </div>
 
-                            {/* Category */}
+                            {/* Category - Multi select (primary = first selected) */}
                             <div className="space-y-2">
-                                <Label htmlFor="category">Category *</Label>
-                                <select
-                                    id="category"
-                                    value={data.category}
-                                    onChange={(e) => setData('category', e.target.value)}
-                                    className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    <option value="">Select a category</option>
-                                    {categories.map((category) => (
-                                        <option key={category.id} value={category.slug}>
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Label>Category *</Label>
+                                <p className="text-xs text-gray-500 mb-1">
+                                    Select one or more categories. The first selected will be used as the primary category.
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {categories.map((category) => {
+                                        const isSelected = selectedCategories.includes(category.slug);
+                                        return (
+                                            <button
+                                                key={category.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedCategories((prev) => {
+                                                        if (prev.includes(category.slug)) {
+                                                            return prev.filter((c) => c !== category.slug);
+                                                        }
+                                                            return [...prev, category.slug];
+                                                    });
+                                                }}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                                                    isSelected
+                                                        ? 'bg-black text-white border-black'
+                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                {category.name}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                                 <InputError message={errors.category} />
                             </div>
 
