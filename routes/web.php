@@ -128,31 +128,32 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('dashboard.my-icons')->with('success', 'Icon deleted successfully!');
     })->name('dashboard.my-icons.destroy');
     
-    // Track icon download - SEO friendly with slug
-    Route::get('/icons/{icon:slug}/download', function (Icon $icon) {
-        $icon->increment('downloads');
-        
-        $filePath = storage_path('app/public/' . $icon->file_path);
-        
-        if (!file_exists($filePath)) {
-            abort(404, 'File not found');
-        }
-        
-        // Use slug for download filename
-        return response()->download($filePath, $icon->slug . '.' . $icon->file_type);
-    })->name('icons.download');
-    
-    // Icon detail page - SEO friendly
-    Route::get('/icons/{icon:slug}', function (Icon $icon) {
-        if (!$icon->is_approved) {
-            abort(404);
-        }
-        
-        return Inertia::render('icon-detail', [
-            'icon' => $icon->load('user'),
-        ]);
-    })->name('icons.show');
 });
+
+// Public icon download with SEO-friendly slug and download counter
+Route::get('/icons/{icon:slug}/download', function (Icon $icon) {
+    $icon->increment('downloads');
+
+    $filePath = storage_path('app/public/' . $icon->file_path);
+
+    if (!file_exists($filePath)) {
+        abort(404, 'File not found');
+    }
+
+    // Use slug for download filename
+    return response()->download($filePath, $icon->slug . '.' . $icon->file_type);
+})->name('icons.download');
+
+// Public icon detail page - SEO friendly
+Route::get('/icons/{icon:slug}', function (Icon $icon) {
+    if (!$icon->is_approved) {
+        abort(404);
+    }
+
+    return Inertia::render('icon-detail', [
+        'icon' => $icon->load('user'),
+    ]);
+})->name('icons.show');
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
