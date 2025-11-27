@@ -107,11 +107,10 @@ export default function Upload({ categories }: UploadProps) {
             });
             return;
         }
-        
-        // Ensure category matches first selected category (for backend)
-        if (selectedCategories.length > 0) {
-            setData('category', selectedCategories[0]);
-        }
+
+        // Determine primary category: first selected, or fallback to 'other'
+        const primaryCategory = selectedCategories.length > 0 ? selectedCategories[0] : 'other';
+        setData('category', primaryCategory);
 
         post(dashboardRoutes.upload().url, {
             onSuccess: () => {
@@ -124,6 +123,7 @@ export default function Upload({ categories }: UploadProps) {
                 setPreview(null);
                 setPreviewImagePreview(null);
                 setFileType('');
+                setSelectedCategories([]);
             },
             onError: () => {
                 toast({
