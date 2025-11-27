@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { show } from '@/routes/two-factor';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
-const sidebarNavItems: NavItem[] = [
+const baseSidebarNavItems: NavItem[] = [
     {
         title: 'Profile',
         href: '/settings/profile',
@@ -30,6 +30,20 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     if (typeof window === 'undefined') {
         return null;
     }
+
+    const { auth } = usePage<SharedData>().props;
+    const isAdmin = auth?.user?.role === 'admin';
+
+    const sidebarNavItems: NavItem[] = isAdmin
+        ? [
+              ...baseSidebarNavItems,
+              {
+                  title: 'Authentication',
+                  href: '/settings/authentication',
+                  icon: null,
+              },
+          ]
+        : baseSidebarNavItems;
 
     const currentPath = window.location.pathname;
 

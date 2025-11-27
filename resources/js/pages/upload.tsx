@@ -35,12 +35,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Upload({ categories }: UploadProps) {
     const { toast } = useToast();
+
+    const defaultCategorySlug =
+        categories.find((c) => c.slug === 'other')?.slug ?? categories[0]?.slug ?? '';
+
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(
+        defaultCategorySlug ? [defaultCategorySlug] : [],
+    );
+
     const { data, setData, post, processing, errors, reset } = useForm({
         icon: null as File | null,
         preview_image: null as File | null,
         name: '',
         description: '',
-        category: '',
+        category: defaultCategorySlug,
         tags: '',
         size: '',
     });
@@ -48,7 +56,6 @@ export default function Upload({ categories }: UploadProps) {
     const [preview, setPreview] = useState<string | null>(null);
     const [previewImagePreview, setPreviewImagePreview] = useState<string | null>(null);
     const [fileType, setFileType] = useState<string>('');
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -97,7 +104,7 @@ export default function Upload({ categories }: UploadProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Validate ICNS requires preview image
         if (fileType !== 'image/svg+xml' && !data.preview_image) {
             toast({
@@ -108,8 +115,9 @@ export default function Upload({ categories }: UploadProps) {
             return;
         }
 
-        // Determine primary category: first selected, or fallback to 'other'
-        const primaryCategory = selectedCategories.length > 0 ? selectedCategories[0] : 'other';
+        // Determine primary category: first selected, or fallback to default/other
+        const primaryCategory =
+            selectedCategories.length > 0 ? selectedCategories[0] : defaultCategorySlug || 'other';
         setData('category', primaryCategory);
 
         post(dashboardRoutes.upload().url, {
@@ -123,7 +131,7 @@ export default function Upload({ categories }: UploadProps) {
                 setPreview(null);
                 setPreviewImagePreview(null);
                 setFileType('');
-                setSelectedCategories([]);
+                setSelectedCategories(defaultCategorySlug ? [defaultCategorySlug] : []);
             },
             onError: () => {
                 toast({
@@ -308,22 +316,22 @@ export default function Upload({ categories }: UploadProps) {
                             <div className="space-y-2">
                                 <Label>Category *</Label>
                                 <p className="text-xs text-gray-500 mb-1">
-                                    Select one or more categories. The first selected will be used as the primary category.
+                                    You can select one or multiple categories. The first selected
+                                    will be used as the primary category.
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {categories.map((category) => {
-                                        const isSelected = selectedCategories.includes(category.slug);
+                                        const isSelected = selectedCategories.includes(
+                                            category.slug,
+                                        );
                                         return (
                                             <button
                                                 key={category.id}
                                                 type="button"
                                                 onClick={() => {
-                                                    setSelectedCategories((prev) => {
-                                                        if (prev.includes(category.slug)) {
-                                                            return prev.filter((c) => c !== category.slug);
-                                                        }
-                                                            return [...prev, category.slug];
-                                                    });
+                                                    // Chỉ cho phép chọn 1 category:
+                                                    // click category nào thì set duy nhất category đó
+                                                    setSelectedCategories([category.slug]);
                                                 }}
                                                 className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                                                     isSelected
