@@ -189,6 +189,17 @@ export default function Welcome({ canRegister = true, icons: initialIcons, categ
                 {/* Main Content */}
                 <div className="flex-1 pt-16">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8 py-8">
+                        {/* Welcome Section */}
+                        <div className="mb-8 text-center">
+                            <h1 className="text-4xl md:text-5xl font-bold text-[#1b1b18] mb-4">
+                                Welcome to macOS Icons
+                            </h1>
+                            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Discover and download beautiful, high-quality macOS-style icons for your projects. 
+                                Free icon library with modern design and easy integration.
+                            </p>
+                        </div>
+
                         {/* Search Bar */}
                         <div className="mb-6">
                             <div className="relative">
