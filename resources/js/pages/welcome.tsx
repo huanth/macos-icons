@@ -153,7 +153,7 @@ export default function Welcome({ canRegister = true, icons: initialIcons, categ
                                 <>
                                     <Link
                                         href={dashboardRoutes.upload().url}
-                                        className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                                        className="hidden md:inline-block text-gray-700 hover:text-gray-900 font-medium transition-colors"
                                     >
                                         Upload Icon
                                     </Link>

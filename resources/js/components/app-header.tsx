@@ -50,16 +50,13 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <Link
                         href="/"
                         prefetch
-                        className="flex items-center space-x-2"
+                        className="flex items-center"
                     >
                         <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-black text-white">
                             <svg className="size-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
                             </svg>
                         </div>
-                        <span className="text-lg font-semibold text-[#1b1b18] hidden sm:inline">
-                            macOS Icons
-                        </span>
                     </Link>
 
                     {/* Mobile: Only Dashboard Link */}
