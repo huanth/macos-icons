@@ -10,7 +10,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, dashboardRoutes } from '@/routes';
+import { dashboard } from '@/routes';
+import dashboardRoutes from '@/routes/dashboard';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Upload, Image, Users, Shield, FolderOpen } from 'lucide-react';

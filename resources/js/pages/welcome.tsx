@@ -8,7 +8,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { formatTitle } from '@/lib/utils';
-import { dashboardRoutes, login, register } from '@/routes';
+import { login, register } from '@/routes';
+import dashboardRoutes from '@/routes/dashboard';
 import { type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';

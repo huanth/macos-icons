@@ -1,7 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatTitle } from '@/lib/utils';
-import { dashboard, dashboardRoutes } from '@/routes';
+import { dashboard } from '@/routes';
+import dashboardRoutes from '@/routes/dashboard';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Download, FileIcon, Upload, Eye } from 'lucide-react';

@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/navigation-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
-import { dashboard, dashboardRoutes, login, register } from '@/routes';
+import { dashboard, login, register } from '@/routes';
+import dashboardRoutes from '@/routes/dashboard';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen } from 'lucide-react';
